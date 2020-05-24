@@ -1,12 +1,11 @@
 import React, { useCallback, useRef } from 'react';
-import { FiLogIn, FiMail, FiLock } from 'react-icons/fi';
+import { FiLock } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 
 import * as Yup from 'yup';
 import { Link, useHistory } from 'react-router-dom';
 
-import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 import getValidationErrors from '../../utils/getValidationErrors';
 
@@ -17,28 +16,27 @@ import Button from '../../components/Button';
 
 import { Container, Content, Background, AnimationContainer } from './styles';
 
-interface SignInFormData {
-  email: string;
+interface ResetPasswordFormData {
   password: string;
+  password_confirmation: string;
 }
 
 const SignIn: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
 
-  const { signIn } = useAuth();
-
   const { addToast } = useToast();
   const history = useHistory();
 
   const handleSubmit = useCallback(
-    async (data: SignInFormData) => {
+    async (data: ResetPasswordFormData) => {
       try {
         formRef.current?.setErrors({});
         const schema = Yup.object().shape({
-          email: Yup.string()
-            .required('E-mail Required')
-            .email('Digit Valid Email'),
           password: Yup.string().required('Password Required'),
+          paswword_confirmation: Yup.string().oneOf(
+            [Yup.ref('password'), null],
+            'Passwords must match',
+          ),
         });
 
         await schema.validate(data, {
@@ -47,12 +45,8 @@ const SignIn: React.FC = () => {
         formRef.current?.setErrors({
           name: 'nome obrigatorio',
         });
-        await signIn({
-          email: data.email,
-          password: data.password,
-        });
 
-        history.push('/dashboards');
+        history.push('/signin');
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err);
@@ -64,12 +58,12 @@ const SignIn: React.FC = () => {
         // Add Toast
         addToast({
           type: 'error',
-          title: 'Error Authentication',
-          description: 'An Error Occur during login, check credentials.',
+          title: 'Error Reset Password',
+          description: 'An Error Occur during reset your password, try again.',
         });
       }
     },
-    [signIn, addToast, history],
+    [addToast, history],
   );
 
   return (
@@ -79,23 +73,24 @@ const SignIn: React.FC = () => {
           <img src={logoImg} alt="GoBarber" />
 
           <Form ref={formRef} onSubmit={handleSubmit}>
-            <h1>Faça seu Logon</h1>
-            <Input name="email" icon={FiMail} placeholder="E-mail" />
+            <h1>Reset Password</h1>
+
             <Input
               name="password"
               icon={FiLock}
               type="password"
-              placeholder="Password"
+              placeholder="New Password"
             />
 
-            <Button type="submit">Enter</Button>
-            <Link to="/forgot-password">Forgot Password</Link>
-          </Form>
+            <Input
+              name="password_confirmation"
+              icon={FiLock}
+              type="password"
+              placeholder="Confirm Password"
+            />
 
-          <Link to="/signup">
-            <FiLogIn />
-            Create Account
-          </Link>
+            <Button type="submit">Change Password</Button>
+          </Form>
         </AnimationContainer>
       </Content>
       <Background />

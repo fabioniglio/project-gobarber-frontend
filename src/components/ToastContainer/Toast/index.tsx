@@ -35,7 +35,7 @@ const Toast: React.FC<ToastProps> = ({ message, sytle }) => {
   return (
     <Container
       type={message.type}
-      hasDescription={!!message.description}
+      hasdescription={message.description !== null ? 1 : 0}
       style={sytle}
     >
       {icons[message.type || 'info']}
