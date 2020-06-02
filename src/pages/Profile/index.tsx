@@ -61,12 +61,17 @@ const Profile: React.FC = () => {
           email: Yup.string()
             .required('E-mail Required')
             .email('Digit Valid Email'),
+
           old_password: Yup.string(),
+
           password: Yup.string().when('old_password', {
             is: (val) => !!val.length,
-            then: Yup.string().required('Field Required'),
+            then: Yup.string()
+              .required('Field Required')
+              .min(6, 'Minimun of 6 digits'),
             otherwise: Yup.string(),
           }),
+
           paswword_confirmation: Yup.string()
             .when('old_password', {
               is: (val) => !!val.length,
