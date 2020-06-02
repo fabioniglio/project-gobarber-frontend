@@ -51,7 +51,6 @@ const Dashboard: React.FC = () => {
   const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
     if (modifiers.available && !modifiers.disabled) {
       setSelectedDate(day);
-      console.log(day);
     }
   }, []);
 

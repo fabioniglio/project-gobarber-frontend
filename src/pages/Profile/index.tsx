@@ -1,9 +1,9 @@
-import React, { useCallback, useRef } from 'react';
-import { FiMail, FiUser, FiLock, FiCamera } from 'react-icons/fi';
+import React, { useCallback, useRef, ChangeEvent } from 'react';
+import { FiMail, FiUser, FiLock, FiCamera, FiArrowLeft } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import api from '../../services/api';
 
 import { useToast } from '../../hooks/toast';
@@ -19,7 +19,9 @@ import { useAuth } from '../../hooks/auth';
 interface ProfileFormData {
   name: string;
   email: string;
+  old_password: string;
   password: string;
+  password_confirmation: string;
 }
 
 const Profile: React.FC = () => {
@@ -27,35 +29,87 @@ const Profile: React.FC = () => {
   const { addToast } = useToast();
   const history = useHistory();
 
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
+
+  const handleAvatarChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) {
+        const data = new FormData();
+
+        data.append('avatar', e.target.files[0]);
+
+        api.patch('users/avatar', data).then((response) => {
+          updateUser(response.data);
+
+          addToast({
+            type: 'success',
+            title: 'Avatar Updated!',
+          });
+        });
+      }
+    },
+    [addToast, updateUser],
+  );
 
   const handleSubmit = useCallback(
     async (data: ProfileFormData) => {
       try {
         formRef.current?.setErrors({});
+
         const schema = Yup.object().shape({
           name: Yup.string().required('Name Required'),
           email: Yup.string()
             .required('E-mail Required')
             .email('Digit Valid Email'),
-          password: Yup.string().min(6, 'At least 6 digits'),
+          old_password: Yup.string(),
+          password: Yup.string().when('old_password', {
+            is: (val) => !!val.length,
+            then: Yup.string().required('Field Required'),
+            otherwise: Yup.string(),
+          }),
+          paswword_confirmation: Yup.string()
+            .when('old_password', {
+              is: (val) => !!val.length,
+              then: Yup.string().required('Field Required'),
+              otherwise: Yup.string(),
+            })
+            .oneOf([Yup.ref('password'), null], 'Passwords must match'),
         });
 
         await schema.validate(data, {
           abortEarly: false,
         });
-        formRef.current?.setErrors({
-          name: 'nome obrigatorio',
-        });
 
-        await api.post('/users', data);
+        const {
+          name,
+          email,
+          old_password,
+          password,
+          password_confirmation,
+        } = data;
+        console.log(data);
+        const formData = {
+          name,
+          email,
+          ...(old_password
+            ? {
+                old_password,
+                password,
+                password_confirmation,
+              }
+            : {}),
+        };
+        console.log(formData);
+        const response = await api.put('/profile', formData);
 
-        history.push('/');
+        updateUser(response.data);
+
+        history.push('/dashboard');
 
         addToast({
           type: 'success',
-          title: 'Registration Completed!',
-          description: 'you can logon now.',
+          title: 'Profile Updated!',
+          description: 'Your informations has been updated successfully.',
         });
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -68,23 +122,44 @@ const Profile: React.FC = () => {
         // Add Toast
         addToast({
           type: 'error',
-          title: 'Error on Registration',
-          description: 'An Error Occur during Registration, try again.',
+          title: 'Error on updating the profile',
+          description: 'An Error Occur during updating the profile, try again.',
         });
       }
     },
-    [addToast, history],
+    [addToast, history, updateUser],
   );
 
   return (
     <Container>
+      <header>
+        <div>
+          <Link to="/dashboard">
+            <FiArrowLeft />
+          </Link>
+        </div>
+      </header>
       <Content>
-        <Form ref={formRef} onSubmit={handleSubmit}>
+        <Form
+          ref={formRef}
+          initialData={{
+            name: user.name,
+            email: user.email,
+          }}
+          onSubmit={handleSubmit}
+        >
           <AvatarInput>
             <img src={user.avatar_url} alt={user.name} />
-            <button type="button">
+            <label htmlFor="avatar">
               <FiCamera />
-            </button>
+
+              <input
+                type="file"
+                name=""
+                id="avatar"
+                onChange={handleAvatarChange}
+              />
+            </label>
           </AvatarInput>
 
           <h1>My profile</h1>
