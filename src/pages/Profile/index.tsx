@@ -72,7 +72,7 @@ const Profile: React.FC = () => {
             otherwise: Yup.string(),
           }),
 
-          paswword_confirmation: Yup.string()
+          password_confirmation: Yup.string()
             .when('old_password', {
               is: (val) => !!val.length,
               then: Yup.string().required('Field Required'),
@@ -179,7 +179,7 @@ const Profile: React.FC = () => {
           />
 
           <Input
-            name="new_password"
+            name="password"
             icon={FiLock}
             type="password"
             placeholder="Password"
