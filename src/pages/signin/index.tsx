@@ -88,7 +88,9 @@ const SignIn: React.FC = () => {
               placeholder="Password"
             />
 
-            <Button type="submit">Enter</Button>
+            <Button name="Enter" type="submit">
+              Enter
+            </Button>
             <Link to="/forgot-password">Forgot Password</Link>
           </Form>
 
