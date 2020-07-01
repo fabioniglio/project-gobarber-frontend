@@ -92,7 +92,7 @@ const Profile: React.FC = () => {
           password,
           password_confirmation,
         } = data;
-        console.log(data);
+
         const formData = {
           name,
           email,
@@ -104,7 +104,7 @@ const Profile: React.FC = () => {
               }
             : {}),
         };
-        console.log(formData);
+
         const response = await api.put('/profile', formData);
 
         updateUser(response.data);
