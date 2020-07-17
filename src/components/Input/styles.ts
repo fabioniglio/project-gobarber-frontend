@@ -9,59 +9,47 @@ interface ContainerProps {
 }
 
 export const Container = styled.div<ContainerProps>`
-
-  background: #232129;
-  color: #f4ede8;
+  background-color: #232129 !important;
   border-radius: 10px;
-
   padding: 16px;
   width: 100%;
-
-  border: 2px solid #233129;
-  color: #636360;
-
+  border: 2px solid #232129;
+  color: #666360;
   display: flex;
   align-items: center;
-
+  transition: all 0.4s;
   & + div {
-        margin-top: 8px;
-      }
-
+    margin-top: 8px;
+  }
   ${(props) =>
     props.isErrored &&
     css`
       border-color: #c53030;
     `}
-
-  ${(props) =>
-    props.isFocused &&
-    css`
-      color: #ff9000;
-      border-color: #ff9000;
-    `}
-    ${(props) =>
-      props.isFilled &&
-      css`
-        color: #ff9000;
-      `}
-
-
+ ${(props) =>
+   props.isFocused &&
+   css`
+     color: #ff9000;
+     border-color: #ff9000;
+   `}
+ ${(props) =>
+   props.isFilled &&
+   css`
+     color: #ff9000;
+   `}
 
   input {
-      flex: 1;
-      background: transparent;
-      border: 0;
-      color: #f4ede8;
-      &::placeholder {
-        color: #636360;
-      }
-
-
+    flex: 1;
+    background: transparent;
+    border: 0;
+    color: #F4EDE8;
+    &::placeholder {
+      color: #666360;
     }
-
-    svg {
-      margin-right: 16px;
-    }
+  }
+  svg {
+    margin-right: 16px;
+  }
 `;
 
 export const Error = styled(Tooltip)`
@@ -70,11 +58,9 @@ export const Error = styled(Tooltip)`
   svg {
     margin: 0;
   }
-
   span {
     background: #c53030;
     color: #fff;
-
     &::before {
       border-color: #c53030 transparent;
     }
